@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using SarahMovies.Data;
 using SarahMovies.Data.Migrations;
 using SarahMovies.Models;
+using Tweetinvi;
+using VaderSharp2;
 
 namespace SarahMovies.Controllers
 {
@@ -19,6 +21,13 @@ namespace SarahMovies.Controllers
         {
             _context = context;
         }
+
+        // GET: Movies
+        public async Task<IActionResult> Index()
+        {
+            return View(await _context.Movie.ToListAsync());
+
+        }
         public async Task<IActionResult> GetMediaMovie(int id)
         {
             var movie = await _context.Movie
@@ -29,12 +38,6 @@ namespace SarahMovies.Controllers
             }
             var imageData = movie.MediaMovie;
             return File(imageData, "image/jpg");
-        }
-
-        // GET: Movies
-        public async Task<IActionResult> Index()
-        {
-            return View(await _context.Movie.ToListAsync());
         }
 
         // GET: Movies/Details/5
@@ -51,8 +54,25 @@ namespace SarahMovies.Controllers
             {
                 return NotFound();
             }
+            MovieDetailsVM movieDetailsVM = new MovieDetailsVM();
+            movieDetailsVM.Movie = movie;
+            movieDetailsVM.Tweets = new List<MovieTweet>();
 
-            return View(movie);
+            var userClient = new TwitterClient("iBoMakUuDeZ3pyD1DTS2GTDgo", "Ckp2OcDqtBRV2ZJ25pPD6enq5kKoyV9QE97mIfFQ4A61SbRt0", "AAAAAAAAAAAAAAAAAAAAADQjhwEAAAAAjkC%2FJrVONtRGUW53kt%2Fo8BlZqys%3D6G4wNsRZvdVN7ndnh1MUcKUd3EmVflXWLXE5bkaI6nDna0CVBC");
+            var searchResponse = await userClient.SearchV2.SearchTweetsAsync(movie.Title);
+            var tweets = searchResponse.Tweets;
+            var analyzer = new SentimentIntensityAnalyzer();
+            foreach (var tweetText in tweets)
+            {
+                var tweet = new MovieTweet();
+                tweet.TweetText = tweetText.Text;
+                var results = analyzer.PolarityScores(tweet.TweetText);
+                tweet.Sentiment = results.Compound;
+                movieDetailsVM.Tweets.Add(tweet);
+            }
+
+
+            return View(movieDetailsVM);
         }
 
         // GET: Movies/Create

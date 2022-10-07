@@ -1,4 +1,4 @@
-﻿@model SarahMovies.Models.Movie
+﻿@model SarahMovies.Models.MovieDetailsVM
 
 @{
     ViewData["Title"] = "Details";
@@ -8,49 +8,95 @@
 <h1>Details</h1>
 
 <div>
+
     <h4>Movie</h4>
     <hr />
-    <dl class="row">
+    <dl class="row" >
+       
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Title)
+            @Html.DisplayNameFor(model => model.Movie.Title)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Title)
+            @Html.DisplayFor(model => model.Movie.Title)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IMDB)
+            @Html.DisplayNameFor(model => model.Movie.IMDB)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IMDB)
+            @Html.DisplayFor(model => model.Movie.IMDB)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Genre)
+            @Html.DisplayNameFor(model => model.Movie.Genre)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Genre)
+            @Html.DisplayFor(model => model.Movie.Genre)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ReleaseYear)
+            @Html.DisplayNameFor(model => model.Movie.ReleaseYear)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ReleaseYear)
+            @Html.DisplayFor(model => model.Movie.ReleaseYear)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.MediaMovie)
+          
+            @Html.DisplayNameFor(model => model.Movie.MediaMovie)
         </dt>
         <dd class = "col-sm-10">
-            @if (Model.MediaMovie != null)
+            @if (Model.Movie.MediaMovie != null)
             {
-                //var base64 = Convert.ToBase64String(item.MediaActor);
-                //var imgSrc = string.Format("data:image/jpg;base65,{0}", base64);
-                //<img src="@imgSrc" height="100" width="100" style="border-radius:50%"/>
 
-                <img width="100" height="100" src="@Url.Action("GetMediaMovie)","Movies", new{Model.Id})" />
+
+                <img width="100" height="100" src="@Url.Action("GetMediaMovie", "Movies", new{Model.Movie.Id})" />
             }
         </dd>
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
+    <a asp-action="Edit" asp-route-id="@Model?.Movie.Id">Edit</a> |
     <a asp-action="Index">Back to List</a>
+    <div>
+        Average Tweet Sentiment:
+        @if (Model.AverageTweetSentiment() != 0)
+        {
+            <span>@string.Format("{0:n2}", Math.Abs(Model.AverageTweetSentiment()) * 100)%</span>
+
+        }
+        @if (Model.AverageTweetSentiment() > 0)
+        {
+            <span>Positive</span>
+        }
+        else if (Model.AverageTweetSentiment() < 0)
+        {
+            <span>Negative</span>
+        }
+        else
+        {
+            <span>Neutral</span>
+        }
+    </div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    Sentiment
+                </th>
+                <th>
+                    Tweet
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var tweet in Model.Tweets)
+            {
+                <tr>
+                    <td>
+                        @tweet.Sentiment
+                    </td>
+                    <td>
+                        @tweet.TweetText
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
 </div>
